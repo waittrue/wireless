@@ -126,7 +126,8 @@ static void l2_packet_receive(int sock, void *eloop_ctx, void *sock_ctx)
 	int res;
 	struct sockaddr_ll ll;
 	socklen_t fromlen;
-
+    
+    printf("%s %d\n",__FILE__,__LINE__);
 	l2->num_rx++;
 	os_memset(&ll, 0, sizeof(ll));
 	fromlen = sizeof(ll);

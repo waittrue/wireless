@@ -10,7 +10,7 @@
 
 #include "includes.h"
 #include <netlink/genl/genl.h>
-
+#include<math.h>
 #include "utils/common.h"
 #include "utils/eloop.h"
 #include "common/qca-vendor.h"
@@ -559,6 +559,32 @@ static void mlme_event_mgmt(struct i802_bss *bss,
 		event.rx_mgmt.freq = nla_get_u32(freq);
 		rx_freq = drv->last_mgmt_freq = event.rx_mgmt.freq;
 	}
+  
+    if(mgmt->sa[0] == 0xdc) 
+    printf("nl80211: RX frame sa=" MACSTR
+		   " freq=%d ssi_signal=%d fc=0x%x seq_ctrl=0x%x stype=%u (%s) len=%u\n",
+		   MAC2STR(mgmt->sa), rx_freq, ssi_signal, fc,
+		   le_to_host16(mgmt->seq_ctrl), stype, fc2str(fc),
+		   (unsigned int) len);
+    if(stype == 13){
+    //受到的是action
+       int send_signal = 0;
+       double diff_db = 0;
+       double distance =0;
+       u8 *ele = &(mgmt->u.action);
+       ele = ele +3;
+       if(ele[0] == 0x23){
+            if(ele[1] == 0x02){
+              send_signal = ele[2];
+              diff_db = send_signal - ssi_signal;
+              distance = ((diff_db-32.4) -20*log10(rx_freq));
+              distance = distance /20;
+              distance = pow(10,distance) *1000;
+              printf("send_signal %d ssi_signal %d iff_db %f  distance: %f\n",send_signal,
+                    ssi_signal,diff_db,distance);
+            }
+       }
+    }	
 	wpa_printf(MSG_DEBUG,
 		   "nl80211: RX frame sa=" MACSTR
 		   " freq=%d ssi_signal=%d fc=0x%x seq_ctrl=0x%x stype=%u (%s) len=%u",
@@ -571,7 +597,6 @@ static void mlme_event_mgmt(struct i802_bss *bss,
 	event.rx_mgmt.drv_priv = bss;
 	wpa_supplicant_event(drv->ctx, EVENT_RX_MGMT, &event);
 }
-
 
 static void mlme_event_mgmt_tx_status(struct wpa_driver_nl80211_data *drv,
 				      struct nlattr *cookie, const u8 *frame,
@@ -1850,6 +1875,7 @@ static void do_process_drv_event(struct i802_bss *bss, int cmd,
 	if (drv->ap_scan_as_station != NL80211_IFTYPE_UNSPECIFIED &&
 	    (cmd == NL80211_CMD_NEW_SCAN_RESULTS ||
 	     cmd == NL80211_CMD_SCAN_ABORTED)) {
+        printf("do_procss_drv_event:%s %d\n",__FILE__,__LINE__);
 		wpa_driver_nl80211_set_mode(drv->first_bss,
 					    drv->ap_scan_as_station);
 		drv->ap_scan_as_station = NL80211_IFTYPE_UNSPECIFIED;

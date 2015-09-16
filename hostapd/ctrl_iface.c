@@ -164,7 +164,7 @@ static int hostapd_ctrl_iface_new_sta(struct hostapd_data *hapd,
 	sta = ap_sta_add(hapd, addr);
 	if (sta == NULL)
 		return -1;
-
+    printf("hostapd_ctrl_iface_new_sta %s %d\n",__FILE__,__LINE__);
 	hostapd_new_assoc_sta(hapd, sta, 0);
 	return 0;
 }

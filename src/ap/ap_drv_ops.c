@@ -647,11 +647,52 @@ int hostapd_drv_set_key(const char *ifname, struct hostapd_data *hapd,
 int hostapd_drv_send_mlme(struct hostapd_data *hapd,
 			  const void *msg, size_t len, int noack)
 {
+    int i=0;
 	if (hapd->driver == NULL || hapd->driver->send_mlme == NULL)
 		return 0;
+   // printf("hostapd_drv_send_mlme %s %d\n",__FILE__,__LINE__);
+    unsigned char *buf = msg;
+   // len += ljh_add_tpc_request(&buf,len);
+   // printf("len :%d\n",len);
+    /*
+    for(i=0;i<len;i++){
+        printf("%02x:",buf[i]);
+    }
+    printf("\n");
+    */
 	return hapd->driver->send_mlme(hapd->drv_priv, msg, len, noack, 0);
 }
-
+//这个是我加的，在一个data中间加入一个tpc request信息元素
+int ljh_add_tpc_request(void **msg,size_t len){
+    int offset = 2+2+6+6+6+2;
+    unsigned char *buf = *msg;
+    unsigned char *result;
+    int pos=0,i;
+    if(len < offset)
+        return 0;
+    pos +=offset;
+    for(;pos<len;pos++){
+        if(buf[pos] == 0x03 && buf[pos+1] == 0x01
+                && buf[pos+2] == 0x01){
+            break;       
+         }
+    }
+    if(pos == len)
+        return 0;
+    result = (char *)malloc(len+2);
+    if(result == NULL)
+        return 0;
+    for(i=0;i<pos;i++){
+        result[i] = buf[i];
+        printf("%02x ",buf[i]);
+    }
+    for(i=pos+2;i<len+2;i++)
+         result[i] = buf[i-2];
+    result[pos] =34;
+    result[pos+1] = 0;
+    *msg = result;
+    return 2; 
+}
 
 int hostapd_drv_sta_deauth(struct hostapd_data *hapd,
 			   const u8 *addr, int reason)
@@ -689,6 +730,7 @@ int hostapd_drv_send_action(struct hostapd_data *hapd, unsigned int freq,
 {
 	if (hapd->driver == NULL || hapd->driver->send_action == NULL)
 		return 0;
+    printf("hostapd_drv_send_action %s %d\n",__FILE__,__LINE__);
 	return hapd->driver->send_action(hapd->drv_priv, freq, wait, dst,
 					 hapd->own_addr, hapd->own_addr, data,
 					 len, 0);

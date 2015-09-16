@@ -1475,6 +1475,7 @@ static int wpa_driver_nl80211_init_nl_global(struct nl80211_global *global)
 	nl_cb_set(global->nl_cb, NL_CB_VALID, NL_CB_CUSTOM,
 		  process_global_event, global);
 
+    printf("wpa_driver_nl80211_init_global:%s %d\n",__FILE__,__LINE__);
 	nl80211_register_eloop_read(&global->nl_event,
 				    wpa_driver_nl80211_event_receive,
 				    global->nl_cb);
@@ -1920,7 +1921,8 @@ static int nl80211_mgmt_subscribe_non_ap(struct i802_bss *bss)
 	if ((drv->capa.rrm_flags & WPA_DRIVER_FLAGS_TX_POWER_INSERTION) &&
 	    (nl80211_register_action_frame(bss, (u8 *) "\x05\x02", 2) < 0))
 		ret = -1;
-
+    
+    printf("%s %d\n",__FILE__,__LINE__);
 	nl80211_mgmt_handle_register_eloop(bss);
 
 	return ret;
@@ -1954,7 +1956,8 @@ static int nl80211_mgmt_subscribe_mesh(struct i802_bss *bss)
 	/* Mesh peering close */
 	if (nl80211_register_action_frame(bss, (u8 *) "\x0f\x03", 2) < 0)
 		ret = -1;
-
+    
+    printf("%s %d\n",__FILE__,__LINE__);
 	nl80211_mgmt_handle_register_eloop(bss);
 
 	return ret;
@@ -2015,7 +2018,8 @@ static int nl80211_mgmt_subscribe_ap(struct i802_bss *bss)
 
 	if (nl80211_get_wiphy_data_ap(bss) == NULL)
 		goto out_err;
-
+    
+    printf("%s %d\n",__FILE__,__LINE__);
 	nl80211_mgmt_handle_register_eloop(bss);
 	return 0;
 
@@ -2038,6 +2042,7 @@ static int nl80211_mgmt_subscribe_ap_dev_sme(struct i802_bss *bss)
 				   NULL, 0) < 0)
 		goto out_err;
 
+    printf("%s %d\n",__FILE__,__LINE__);
 	nl80211_mgmt_handle_register_eloop(bss);
 	return 0;
 
@@ -3360,7 +3365,8 @@ static int wpa_driver_nl80211_set_ap(void *priv,
 			    params->proberesp))
 			goto fail;
 	}
-	switch (params->hide_ssid) {
+	
+    switch (params->hide_ssid) {
 	case NO_SSID_HIDING:
 		wpa_printf(MSG_DEBUG, "nl80211: hidden SSID not in use");
 		if (nla_put_u32(msg, NL80211_ATTR_HIDDEN_SSID,
@@ -4321,6 +4327,8 @@ static int wpa_driver_nl80211_ap(struct wpa_driver_nl80211_data *drv,
 		nlmode = NL80211_IFTYPE_AP;
 
 	old_mode = drv->nlmode;
+
+    printf("wpa_driver_nl80211_ap:%s %d\n",__FILE__,__LINE__);
 	if (wpa_driver_nl80211_set_mode(drv->first_bss, nlmode)) {
 		nl80211_remove_monitor_interface(drv);
 		return -1;
@@ -4978,6 +4986,8 @@ done:
 	if (is_ap_interface(nlmode)) {
 		nl80211_mgmt_unsubscribe(bss, "start AP");
 		/* Setup additional AP mode functionality if needed */
+        
+        printf("%s %d\n",__FILE__,__LINE__);
 		if (nl80211_setup_ap(bss))
 			return -1;
 	} else if (was_ap) {
@@ -5003,7 +5013,8 @@ done:
 
 int wpa_driver_nl80211_set_mode(struct i802_bss *bss,
 				enum nl80211_iftype nlmode)
-{
+{ 
+    printf("wpa_driver_nl_set_mode :%s %d\n",__FILE__,__LINE__);
 	return wpa_driver_nl80211_set_mode_impl(bss, nlmode, NULL);
 }
 
@@ -5607,7 +5618,7 @@ static void handle_eapol(int sock, void *eloop_ctx, void *sock_ctx)
 	unsigned char buf[3000];
 	int len;
 	socklen_t fromlen = sizeof(lladdr);
-
+    printf("%s %d handle_eapol",__FILE__,__LINE__);
 	len = recvfrom(sock, buf, sizeof(buf), 0,
 		       (struct sockaddr *)&lladdr, &fromlen);
 	if (len < 0) {
@@ -5752,7 +5763,7 @@ static void *i802_init(struct hostapd_data *hapd,
 		}
 	}
 #endif /* CONFIG_LIBNL3_ROUTE */
-
+    //这个socket是做的mac层的数据的收发，不是管理贞
 	drv->eapol_sock = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_PAE));
 	if (drv->eapol_sock < 0) {
 		wpa_printf(MSG_ERROR, "nl80211: socket(PF_PACKET, SOCK_DGRAM, ETH_P_PAE) failed: %s",
@@ -6172,10 +6183,14 @@ static int wpa_driver_nl80211_send_action(struct i802_bss *bss,
 					  const u8 *data, size_t data_len,
 					  int no_cck)
 {
-	struct wpa_driver_nl80211_data *drv = bss->drv;
+	
+    printf("wpa_driver_nl80211_send_action\n");
+    struct wpa_driver_nl80211_data *drv = bss->drv;
 	int ret = -1;
 	u8 *buf;
 	struct ieee80211_hdr *hdr;
+    printf("nl80211: Send Action frame (ifindex=%d,freq=%u MHz wait=%d ms no_cck=%d)\n",
+            drv->ifindex, freq, wait_time, no_cck);
 
 	wpa_printf(MSG_DEBUG, "nl80211: Send Action frame (ifindex=%d, "
 		   "freq=%u MHz wait=%d ms no_cck=%d)",
@@ -6191,14 +6206,17 @@ static int wpa_driver_nl80211_send_action(struct i802_bss *bss,
 	os_memcpy(hdr->addr1, dst, ETH_ALEN);
 	os_memcpy(hdr->addr2, src, ETH_ALEN);
 	os_memcpy(hdr->addr3, bssid, ETH_ALEN);
-
+    
+    printf("ready to if else\n");
 	if (is_ap_interface(drv->nlmode) &&
 	    (!(drv->capa.flags & WPA_DRIVER_FLAGS_OFFCHANNEL_TX) ||
 	     (int) freq == bss->freq || drv->device_ap_sme ||
-	     !drv->use_monitor))
+	     !drv->use_monitor)){
+         printf("action send wpa_driver_nl80211_send_mlme\n");
 		ret = wpa_driver_nl80211_send_mlme(bss, buf, 24 + data_len,
 						   0, freq, no_cck, 1,
 						   wait_time);
+         }
 	else
 		ret = nl80211_send_frame_cmd(bss, freq, wait_time, buf,
 					     24 + data_len,
@@ -7301,6 +7319,7 @@ static int driver_nl80211_send_action(void *priv, unsigned int freq,
 				      int no_cck)
 {
 	struct i802_bss *bss = priv;
+    printf("driver_nl80211_send_action %s %d\n",__FILE__,__LINE__);
 	return wpa_driver_nl80211_send_action(bss, freq, wait_time, dst, src,
 					      bssid, data, data_len, no_cck);
 }

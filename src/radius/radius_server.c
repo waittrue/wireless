@@ -1180,7 +1180,14 @@ send_reply:
 	return 0;
 }
 
-
+/** 这个函数是在有数据的时候回掉使用的，即在
+*data->auth_sock上有消息到达时调用radius_server_receive_auth进行处理
+* 执行步奏：
+*1:recvfrom接收数据
+*2:取得客户端信息，包括安全关联等
+*3:msg = radius_msg_parse(buf, len);解析radius属性。其中msg为 struct radius_msg *msg = NULL;
+*4:radius_msg_verify_msg_auth校验80属性
+**/
 static void radius_server_receive_auth(int sock, void *eloop_ctx,
 				       void *sock_ctx)
 {
@@ -1791,6 +1798,8 @@ radius_server_init(struct radius_server_conf *conf)
 		radius_server_deinit(data);
 		return NULL;
 	}
+    //注册事件的回调函数  个人理解为read的回掉 
+    //即在data->auth_sock上有消息到达时调用radius_server_receive_auth进行处理
 	if (eloop_register_read_sock(data->auth_sock,
 				     radius_server_receive_auth,
 				     data, NULL)) {

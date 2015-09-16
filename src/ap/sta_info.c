@@ -1047,7 +1047,7 @@ void ap_sta_set_authorized(struct hostapd_data *hapd, struct sta_info *sta,
 				    ip_addr_buf[2], ip_addr_buf[3]);
 		}
 #endif /* CONFIG_P2P */
-
+        printf("AP_sta_connected%s %d\n",__FILE__,__LINE__);
 		wpa_msg(hapd->msg_ctx, MSG_INFO, AP_STA_CONNECTED "%s%s",
 			buf, ip_addr);
 

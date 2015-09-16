@@ -1773,8 +1773,11 @@ hostapd_alloc_bss_data(struct hostapd_iface *hapd_iface,
 		return NULL;
 
 	hapd->new_assoc_sta_cb = hostapd_new_assoc_sta;
+    //本interface的配置信息
 	hapd->iconf = conf;
+    //本bss的配置信息
 	hapd->conf = bss;
+    //属于那个interface
 	hapd->iface = hapd_iface;
 	hapd->driver = hapd->iconf->driver;
 	hapd->ctrl_sock = -1;
@@ -1861,7 +1864,7 @@ struct hostapd_iface * hostapd_init(struct hapd_interfaces *interfaces,
 	hapd_iface->config_fname = os_strdup(config_file);
 	if (hapd_iface->config_fname == NULL)
 		goto fail;
-
+    //从配置文件中读取配置，赋值给conf
 	conf = interfaces->config_read_cb(hapd_iface->config_fname);
 	if (conf == NULL)
 		goto fail;
@@ -1874,6 +1877,7 @@ struct hostapd_iface * hostapd_init(struct hapd_interfaces *interfaces,
 		goto fail;
 
 	for (i = 0; i < conf->num_bss; i++) {
+    //分配相关的空间和赋与相关的值
 		hapd = hapd_iface->bss[i] =
 			hostapd_alloc_bss_data(hapd_iface, conf,
 					       conf->bss[i]);
@@ -2577,6 +2581,7 @@ void hostapd_new_assoc_sta(struct hostapd_data *hapd, struct sta_info *sta,
 	if (!hapd->conf->ieee802_1x && !hapd->conf->wpa && !hapd->conf->osen) {
 		ap_sta_set_authorized(hapd, sta, 1);
 		os_get_reltime(&sta->connected_time);
+        printf("%s %d\n",__FILE__,__LINE__);
 		accounting_sta_start(hapd, sta);
 	}
 

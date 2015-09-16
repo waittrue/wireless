@@ -1954,9 +1954,13 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 		for (j = 0; wpa_drivers[j]; j++) {
 			if (os_strcmp(pos, wpa_drivers[j]->name) == 0) {
 				conf->driver = wpa_drivers[j];
+                //我增加的
+                wpa_printf(MSG_ERROR,"postion: %d driver: %s == %s",
+                j,pos,wpa_drivers[j]->name);
 				break;
 			}
 		}
+			
 		if (conf->driver == NULL) {
 			wpa_printf(MSG_ERROR,
 				   "Line %d: invalid/unknown driver '%s'",
@@ -3433,7 +3437,7 @@ struct hostapd_config * hostapd_config_read(const char *fname)
 	int line = 0;
 	int errors = 0;
 	size_t i;
-
+    
 	f = fopen(fname, "r");
 	if (f == NULL) {
 		wpa_printf(MSG_ERROR, "Could not open configuration file '%s' "

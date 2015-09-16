@@ -52,7 +52,7 @@ static void hostapd_logger_cb(void *ctx, const u8 *addr, unsigned int module,
 	format = os_malloc(maxlen);
 	if (!format)
 		return;
-
+   
 	if (hapd && hapd->conf) {
 		conf_syslog_level = hapd->conf->logger_syslog_level;
 		conf_stdout_level = hapd->conf->logger_stdout_level;
@@ -315,11 +315,12 @@ static int hostapd_global_init(struct hapd_interfaces *interfaces,
 			       const char *entropy_file)
 {
 	int i;
-
+    //重只global变量
 	os_memset(&global, 0, sizeof(global));
-
+    
 	hostapd_logger_register_cb(hostapd_logger_cb);
 
+    //注册eap server的加密方法
 	if (eap_server_register_methods()) {
 		wpa_printf(MSG_ERROR, "Failed to register EAP methods");
 		return -1;
@@ -407,7 +408,8 @@ static int hostapd_global_run(struct hapd_interfaces *ifaces, int daemonize,
 		return -1;
 	}
 #endif /* EAP_SERVER_TNC */
-
+//这里的daemonize是用户运行程序的输入的b,有则daemonize = 1
+//else daemonize =0;
 	if (daemonize && os_daemonize(pid_file)) {
 		wpa_printf(MSG_ERROR, "daemon: %s", strerror(errno));
 		return -1;
@@ -558,6 +560,7 @@ static void hostapd_periodic(void *eloop_ctx, void *timeout_ctx)
 
 int main(int argc, char *argv[])
 {
+    //记录所有的interface 的数据结构,里面还有一些基本的调用的方法
 	struct hapd_interfaces interfaces;
 	int ret = 1;
 	size_t i, j;
@@ -573,7 +576,7 @@ int main(int argc, char *argv[])
 
 	if (os_program_init())
 		return -1;
-
+    
 	os_memset(&interfaces, 0, sizeof(interfaces));
 	interfaces.reload_config = hostapd_reload_config;
 	interfaces.config_read_cb = hostapd_config_read;
@@ -599,6 +602,8 @@ int main(int argc, char *argv[])
 			if (wpa_debug_level > 0)
 				wpa_debug_level--;
 			break;
+        //作为守护进程运行,就是变成在后台使用，不能和用户交互了，
+        //这里调用了系统调用daemon 这个可以学习哈
 		case 'B':
 			daemonize++;
 			break;
@@ -613,6 +618,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'P':
 			os_free(pid_file);
+            //把相对地址，转换成绝对地址
 			pid_file = os_rel2abs_path(optarg);
 			break;
 		case 't':

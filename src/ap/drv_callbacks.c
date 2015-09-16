@@ -63,6 +63,7 @@ int hostapd_notif_assoc(struct hostapd_data *hapd, const u8 *addr,
 			   "hostapd_notif_assoc: Skip event with no address");
 		return -1;
 	}
+    printf("hostapd_notif_assoc %s %d\n",__FILE__,__LINE__);
 	random_add_randomness(addr, ETH_ALEN);
 
 	hostapd_logger(hapd, addr, HOSTAPD_MODULE_IEEE80211,
@@ -901,8 +902,8 @@ static int hostapd_event_new_sta(struct hostapd_data *hapd, const u8 *addr)
 
 	if (sta)
 		return 0;
-
-	wpa_printf(MSG_DEBUG, "Data frame from unknown STA " MACSTR
+	printf("hostapd_event_new_sta %s %d\n",__FILE__,__LINE__);
+    wpa_printf(MSG_DEBUG, "Data frame from unknown STA " MACSTR
 		   " - adding a new STA", MAC2STR(addr));
 	sta = ap_sta_add(hapd, addr);
 	if (sta) {
@@ -912,7 +913,7 @@ static int hostapd_event_new_sta(struct hostapd_data *hapd, const u8 *addr)
 			   MAC2STR(addr));
 		return -1;
 	}
-
+    
 	return 0;
 }
 

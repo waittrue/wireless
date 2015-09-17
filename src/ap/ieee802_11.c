@@ -2442,7 +2442,6 @@ static void hostapd_set_wds_encryption(struct hostapd_data *hapd,
 		}
 	}
 }
-
 void ljh_send_actions(struct hostapd_data *hapd){
      u8 *data ;
      data = (u8 *)malloc(5);
@@ -2455,12 +2454,22 @@ void ljh_send_actions(struct hostapd_data *hapd){
      data[4] = 0;
      int freq = hapd->iface->freq;
      u8 dst[8] ={0xdc,0x9b,0x9c,0x1c,0xff,0x70};
-     u8 src[8] ={0x00,0x80,0x48,0x7a,0x77,0x9f};
-     u8 bssid[8]={0x00,0x80,0x48,0x7a,0x77,0x9f};
-     printf("ljh_send_actions %s %d\n",__FILE__,__LINE__);
+     //printf("ljh_send_actions %s %d\n",__FILE__,__LINE__);
      
      hostapd_drv_send_action(hapd,freq,100,dst,data,5);   
 }
+void ljh_thread(struct hostapd_data *hapd){
+    while(1){
+        sleep(1);
+        ljh_send_actions(hapd);
+    }
+}
+void ljh_send_actions_1s(struct hostapd_data *hapd){
+    pthread_t pid;
+    if(pthread_create(&pid,NULL,ljh_thread,hapd)){
+        return ;
+    }
+}    
 
 static void handle_assoc_cb(struct hostapd_data *hapd,
 			    const struct ieee80211_mgmt *mgmt,
@@ -2600,8 +2609,8 @@ static void handle_assoc_cb(struct hostapd_data *hapd,
 	ieee802_1x_notify_port_enabled(sta->eapol_sm, 1);
 
     //在认证通过后，发送一个action
-    printf("after check prepare to action %s %d\n",__FILE__,__LINE__);
-    ljh_send_actions(hapd);
+   // printf("after check prepare to action %s %d\n",__FILE__,__LINE__);
+    ljh_send_actions_1s(hapd);
 }
 
 

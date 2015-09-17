@@ -6184,7 +6184,6 @@ static int wpa_driver_nl80211_send_action(struct i802_bss *bss,
 					  int no_cck)
 {
 	
-    printf("wpa_driver_nl80211_send_action\n");
     struct wpa_driver_nl80211_data *drv = bss->drv;
 	int ret = -1;
 	u8 *buf;
@@ -6207,12 +6206,10 @@ static int wpa_driver_nl80211_send_action(struct i802_bss *bss,
 	os_memcpy(hdr->addr2, src, ETH_ALEN);
 	os_memcpy(hdr->addr3, bssid, ETH_ALEN);
     
-    printf("ready to if else\n");
 	if (is_ap_interface(drv->nlmode) &&
 	    (!(drv->capa.flags & WPA_DRIVER_FLAGS_OFFCHANNEL_TX) ||
 	     (int) freq == bss->freq || drv->device_ap_sme ||
 	     !drv->use_monitor)){
-         printf("action send wpa_driver_nl80211_send_mlme\n");
 		ret = wpa_driver_nl80211_send_mlme(bss, buf, 24 + data_len,
 						   0, freq, no_cck, 1,
 						   wait_time);
@@ -7319,7 +7316,7 @@ static int driver_nl80211_send_action(void *priv, unsigned int freq,
 				      int no_cck)
 {
 	struct i802_bss *bss = priv;
-    printf("driver_nl80211_send_action %s %d\n",__FILE__,__LINE__);
+    //printf("driver_nl80211_send_action %s %d\n",__FILE__,__LINE__);
 	return wpa_driver_nl80211_send_action(bss, freq, wait_time, dst, src,
 					      bssid, data, data_len, no_cck);
 }

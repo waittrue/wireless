@@ -730,7 +730,7 @@ int hostapd_drv_send_action(struct hostapd_data *hapd, unsigned int freq,
 {
 	if (hapd->driver == NULL || hapd->driver->send_action == NULL)
 		return 0;
-    printf("hostapd_drv_send_action %s %d\n",__FILE__,__LINE__);
+    //printf("hostapd_drv_send_action %s %d\n",__FILE__,__LINE__);
 	return hapd->driver->send_action(hapd->drv_priv, freq, wait, dst,
 					 hapd->own_addr, hapd->own_addr, data,
 					 len, 0);

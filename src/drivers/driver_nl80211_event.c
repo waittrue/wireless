@@ -528,8 +528,26 @@ static void mlme_timeout_event(struct wpa_driver_nl80211_data *drv,
 	os_memcpy(event.timeout_event.addr, nla_data(addr), ETH_ALEN);
 	wpa_supplicant_event(drv->ctx, ev, &event);
 }
+/**
+  freq(mHz)  send_db  receive_db  diff_db  distance
 
-
+**/
+void ljh_write_file(int freq,int send_db,int receive_db
+                ,double diff_db,double distance){
+   FILE *fp ;
+   char *path = "../data/receive_data.txt";
+   fp = fopen(path,"a");
+   if(fp == NULL)
+        return;
+   if(ftell(fp) == 0){
+      fprintf(fp,"freq(mHz)    send_db    receive_db    diff_db    distance\n");
+   }
+   fseek(fp,0,SEEK_END);
+   fprintf(fp,"%-13d%-11d%-14d%-11.4f%-12.4f\n",freq,send_db,receive_db,
+                    diff_db,distance);
+   fclose(fp);
+   
+}
 static void mlme_event_mgmt(struct i802_bss *bss,
 			    struct nlattr *freq, struct nlattr *sig,
 			    const u8 *frame, size_t len)
@@ -582,6 +600,7 @@ static void mlme_event_mgmt(struct i802_bss *bss,
               distance = pow(10,distance) *1000;
               printf("send_signal %d ssi_signal %d iff_db %f  distance: %f\n",send_signal,
                     ssi_signal,diff_db,distance);
+              ljh_write_file(rx_freq,send_signal,ssi_signal,diff_db,distance);
             }
        }
     }	
